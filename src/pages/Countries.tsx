@@ -1,8 +1,13 @@
-import { Globe, TrendingUp } from "lucide-react";
+import { Globe, TrendingUp, MapPin } from "lucide-react";
 import { COUNTRIES } from "@/hooks/useCountryGoldPrices";
 import GoldIcon from "@/components/GoldIcon";
 import SectionHeader from "@/components/SectionHeader";
 import CountryCard from "@/components/CountryCard";
+
+// GCC countries slugs
+const GCC_SLUGS = ["qatar", "uae", "dubai", "saudi-arabia", "kuwait"];
+// South Asian countries slugs  
+const SOUTH_ASIAN_SLUGS = ["bangladesh", "india", "pakistan"];
 
 const Countries = () => {
   const countryList = Object.entries(COUNTRIES).map(([slug, country]) => ({
@@ -10,8 +15,9 @@ const Countries = () => {
     ...country,
   }));
 
-  const gccCountries = countryList.filter(c => ["qatar", "uae", "dubai", "saudi-arabia", "kuwait"].includes(c.slug));
-  const otherCountries = countryList.filter(c => !["qatar", "uae", "dubai", "saudi-arabia", "kuwait"].includes(c.slug));
+  const gccCountries = countryList.filter(c => GCC_SLUGS.includes(c.slug));
+  const southAsianCountries = countryList.filter(c => SOUTH_ASIAN_SLUGS.includes(c.slug));
+  const otherCountries = countryList.filter(c => !GCC_SLUGS.includes(c.slug) && !SOUTH_ASIAN_SLUGS.includes(c.slug));
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,10 +39,10 @@ const Countries = () => {
           </p>
         </header>
 
-        <main className="space-y-10">
+        <main className="space-y-8 sm:space-y-10">
           <section className="opacity-0 animate-slide-up delay-300">
             <SectionHeader icon={Globe} title="Gulf Countries (GCC)" subtitle="Gold prices in Gulf region" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
               {gccCountries.map((country, index) => (
                 <CountryCard key={country.slug} country={country} index={index} />
               ))}
@@ -44,8 +50,17 @@ const Countries = () => {
           </section>
 
           <section className="opacity-0 animate-slide-up delay-400">
+            <SectionHeader icon={MapPin} title="South Asian Markets" subtitle="Gold prices in South Asia" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+              {southAsianCountries.map((country, index) => (
+                <CountryCard key={country.slug} country={country} index={index} />
+              ))}
+            </div>
+          </section>
+
+          <section className="opacity-0 animate-slide-up delay-500">
             <SectionHeader icon={TrendingUp} title="International Markets" subtitle="Gold prices worldwide" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
               {otherCountries.map((country, index) => (
                 <CountryCard key={country.slug} country={country} index={index} />
               ))}
