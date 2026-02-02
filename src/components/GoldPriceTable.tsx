@@ -5,9 +5,10 @@ import { GoldPrice } from "@/hooks/useGoldPrices";
 interface GoldPriceTableProps {
   prices: GoldPrice[];
   isLoading?: boolean;
+  currencySymbol?: string;
 }
 
-const GoldPriceTable = ({ prices, isLoading }: GoldPriceTableProps) => {
+const GoldPriceTable = ({ prices, isLoading, currencySymbol = "QAR" }: GoldPriceTableProps) => {
   if (isLoading) {
     return (
       <div className="rounded-xl modern-card-gold overflow-hidden">
@@ -101,7 +102,7 @@ const GoldPriceTable = ({ prices, isLoading }: GoldPriceTableProps) => {
                   <span className="text-lg sm:text-xl font-bold gold-text">
                     {price.pricePerGram}
                   </span>
-                  <span className="text-sm text-muted-foreground ml-1.5">QAR</span>
+                  <span className="text-sm text-muted-foreground ml-1.5">{currencySymbol}</span>
                 </td>
                 <td className="px-4 sm:px-6 py-4 text-right hidden md:table-cell">
                   {price.change && (

@@ -13,6 +13,7 @@ interface SilverPriceCardProps {
     isDown: boolean;
   } | null;
   isLoading?: boolean;
+  currencySymbol?: string;
 }
 
 type WeightUnit = "gram" | "bori" | "tola" | "ounce";
@@ -24,7 +25,7 @@ const CONVERSION_TO_GRAMS: Record<WeightUnit, number> = {
   ounce: 31.1035,
 };
 
-const SilverPriceCard = ({ silverPrice, isLoading }: SilverPriceCardProps) => {
+const SilverPriceCard = ({ silverPrice, isLoading, currencySymbol = "QAR" }: SilverPriceCardProps) => {
   const [weight, setWeight] = useState<string>("1");
   const [unit, setUnit] = useState<WeightUnit>("bori");
 
@@ -106,7 +107,7 @@ const SilverPriceCard = ({ silverPrice, isLoading }: SilverPriceCardProps) => {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">QAR</span>
+              <span className="text-sm text-muted-foreground">{currencySymbol}</span>
               {index === 0 && silverPrice.change && (
                 <div className={cn(
                   "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
@@ -136,7 +137,7 @@ const SilverPriceCard = ({ silverPrice, isLoading }: SilverPriceCardProps) => {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Silver Calculator</h3>
-              <p className="text-sm text-muted-foreground">Calculate silver value in QAR</p>
+              <p className="text-sm text-muted-foreground">Calculate silver value in {currencySymbol}</p>
             </div>
           </div>
         </div>
@@ -185,14 +186,14 @@ const SilverPriceCard = ({ silverPrice, isLoading }: SilverPriceCardProps) => {
               <ArrowRight className="w-4 h-4" />
               <span>{calculations.weightInGrams}g</span>
               <span className="text-slate-400">×</span>
-              <span className="text-slate-400">{calculations.pricePerGram} QAR/g</span>
+              <span className="text-slate-400">{calculations.pricePerGram} {currencySymbol}/g</span>
             </div>
 
             <div className="flex items-baseline gap-2">
               <span className="text-3xl sm:text-4xl font-bold silver-text">
                 {calculations.totalValue}
               </span>
-              <span className="text-lg text-slate-400 font-semibold">QAR</span>
+              <span className="text-lg text-slate-400 font-semibold">{currencySymbol}</span>
             </div>
 
             <p className="text-sm text-muted-foreground mt-3">
