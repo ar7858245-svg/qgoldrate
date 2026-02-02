@@ -1,4 +1,4 @@
-import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, LineChart, ArrowRightLeft, Globe } from "lucide-react";
+import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, ArrowRightLeft, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GoldIcon from "@/components/GoldIcon";
 import GoldPriceTable from "@/components/GoldPriceTable";
@@ -6,13 +6,13 @@ import SpotGoldCard from "@/components/SpotGoldCard";
 import KaratComparison from "@/components/KaratComparison";
 import GoldCalculator from "@/components/GoldCalculator";
 import SilverPriceCard from "@/components/SilverPriceCard";
-import GulfGoldRates from "@/components/GulfGoldRates";
+import CountrySection from "@/components/CountrySection";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
+import SectionHeader from "@/components/SectionHeader";
 import { GoldPriceChart } from "@/components/GoldPriceChart";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { useGoldPrices } from "@/hooks/useGoldPrices";
-import { AdBanner, InArticleAd } from "@/components/AdBanner";
 
 const Index = () => {
   const { metrics, isLoading, error, lastUpdated, refetch } = useGoldPrices();
@@ -76,34 +76,34 @@ const Index = () => {
                 <SectionHeader icon={TrendingUp} title="Spot Gold (24K)" subtitle="Real-time international gold price" />
                 <SpotGoldCard spotGold={metrics.spotGold} isLoading={isLoading} />
               </section>
+              
               <section className="opacity-0 animate-slide-up delay-500">
                 <SectionHeader icon={BarChart3} title="Gold Price Per Gram" subtitle="All karat prices in QAR" />
                 <GoldPriceTable prices={metrics.gramPrices} isLoading={isLoading} />
               </section>
+              
               <section><GoldPriceChart /></section>
-              <section>
-                <SectionHeader icon={Globe} title="Gulf Countries Gold Rates" subtitle="Compare 24K gold prices across GCC" />
-                <GulfGoldRates
-                  qatarPrice24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.pricePerGram || null}
-                  qatarPrice22K={metrics.gramPrices.find(p => p.karat === "22K Gold")?.pricePerGram || null}
-                  qatarPrice21K={metrics.gramPrices.find(p => p.karat === "21K Gold")?.pricePerGram || null}
-                  change24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.change}
-                  isDown24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.isDown}
-                  isLoading={isLoading}
-                />
+              
+              {/* Global Gold Prices Section */}
+              <section className="opacity-0 animate-slide-up">
+                <CountrySection />
               </section>
+              
               <section>
                 <SectionHeader icon={Layers} title="Karat Comparison" subtitle="Savings compared to 24K gold" />
                 <KaratComparison prices={metrics.gramPrices} />
               </section>
+              
               <section>
                 <SectionHeader icon={ArrowRightLeft} title="Currency Converter" subtitle="Gold value in multiple currencies" />
                 <CurrencyConverter prices={metrics.gramPrices} />
               </section>
+              
               <section>
                 <SectionHeader icon={Calculator} title="Gold Calculator" subtitle="Calculate gold value by weight" />
                 <GoldCalculator prices={metrics.gramPrices} />
               </section>
+              
               {metrics.silverPrice && (
                 <section>
                   <SectionHeader icon={TrendingUp} title="Silver Price" subtitle="Real-time silver rates in QAR" color="silver" />
@@ -117,17 +117,5 @@ const Index = () => {
     </div>
   );
 };
-
-const SectionHeader = ({ icon: Icon, title, subtitle, color = "gold" }: { icon: React.ElementType; title: string; subtitle: string; color?: "gold" | "silver" }) => (
-  <div className="flex items-center gap-3 mb-4 sm:mb-6">
-    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${color === "gold" ? "bg-primary/10 text-primary" : "bg-slate-400/10 text-slate-400"}`}>
-      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-    </div>
-    <div>
-      <h2 className="text-lg sm:text-xl font-semibold text-foreground">{title}</h2>
-      <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
-    </div>
-  </div>
-);
 
 export default Index;
