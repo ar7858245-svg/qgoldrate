@@ -1,4 +1,4 @@
-import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, LineChart, ArrowRightLeft } from "lucide-react";
+import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, LineChart, ArrowRightLeft, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GoldIcon from "@/components/GoldIcon";
 import GoldPriceTable from "@/components/GoldPriceTable";
@@ -6,6 +6,7 @@ import SpotGoldCard from "@/components/SpotGoldCard";
 import KaratComparison from "@/components/KaratComparison";
 import GoldCalculator from "@/components/GoldCalculator";
 import SilverPriceCard from "@/components/SilverPriceCard";
+import GulfGoldRates from "@/components/GulfGoldRates";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 import { GoldPriceChart } from "@/components/GoldPriceChart";
@@ -80,6 +81,17 @@ const Index = () => {
                 <GoldPriceTable prices={metrics.gramPrices} isLoading={isLoading} />
               </section>
               <section><GoldPriceChart /></section>
+              <section>
+                <SectionHeader icon={Globe} title="Gulf Countries Gold Rates" subtitle="Compare 24K gold prices across GCC" />
+                <GulfGoldRates
+                  qatarPrice24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.pricePerGram || null}
+                  qatarPrice22K={metrics.gramPrices.find(p => p.karat === "22K Gold")?.pricePerGram || null}
+                  qatarPrice21K={metrics.gramPrices.find(p => p.karat === "21K Gold")?.pricePerGram || null}
+                  change24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.change}
+                  isDown24K={metrics.gramPrices.find(p => p.karat === "24K Gold")?.isDown}
+                  isLoading={isLoading}
+                />
+              </section>
               <section>
                 <SectionHeader icon={Layers} title="Karat Comparison" subtitle="Savings compared to 24K gold" />
                 <KaratComparison prices={metrics.gramPrices} />
