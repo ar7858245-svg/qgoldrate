@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface GoldCalculatorProps {
   prices: GoldPrice[];
+  currencySymbol?: string;
 }
 
 type WeightUnit = "gram" | "bori" | "tola" | "ounce";
@@ -18,7 +19,7 @@ const CONVERSION_TO_GRAMS: Record<WeightUnit, number> = {
   ounce: 31.1035,
 };
 
-const GoldCalculator = ({ prices }: GoldCalculatorProps) => {
+const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps) => {
   const [weight, setWeight] = useState<string>("1");
   const [unit, setUnit] = useState<WeightUnit>("bori");
   const [selectedKarat, setSelectedKarat] = useState<string>("24K Gold");
@@ -63,7 +64,7 @@ const GoldCalculator = ({ prices }: GoldCalculatorProps) => {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Gold Calculator</h3>
-            <p className="text-sm text-muted-foreground">Calculate gold value in QAR</p>
+            <p className="text-sm text-muted-foreground">Calculate gold value in {currencySymbol}</p>
           </div>
         </div>
       </div>
@@ -134,14 +135,14 @@ const GoldCalculator = ({ prices }: GoldCalculatorProps) => {
             <ArrowRight className="w-4 h-4" />
             <span>{calculations.weightInGrams}g</span>
             <span className="text-primary">×</span>
-            <span className="text-primary">{calculations.pricePerGram} QAR/g</span>
+            <span className="text-primary">{calculations.pricePerGram} {currencySymbol}/g</span>
           </div>
 
           <div className="flex items-baseline gap-2">
             <span className="text-3xl sm:text-4xl font-bold gold-text">
               {calculations.totalValue}
             </span>
-            <span className="text-lg text-primary font-semibold">QAR</span>
+            <span className="text-lg text-primary font-semibold">{currencySymbol}</span>
           </div>
 
           <p className="text-sm text-muted-foreground mt-3">

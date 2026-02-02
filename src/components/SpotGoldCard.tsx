@@ -10,9 +10,10 @@ interface SpotGoldCardProps {
     isDown: boolean;
   } | null;
   isLoading?: boolean;
+  currencySymbol?: string;
 }
 
-const SpotGoldCard = ({ spotGold, isLoading }: SpotGoldCardProps) => {
+const SpotGoldCard = ({ spotGold, isLoading, currencySymbol = "QAR" }: SpotGoldCardProps) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -63,7 +64,7 @@ const SpotGoldCard = ({ spotGold, isLoading }: SpotGoldCardProps) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">QAR</span>
+            <span className="text-sm text-muted-foreground">{currencySymbol}</span>
             {index === 0 && spotGold.change && (
               <div className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
