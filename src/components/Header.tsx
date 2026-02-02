@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, TrendingUp, Calculator, BookOpen, BarChart3, HelpCircle } from "lucide-react";
+import { Menu, X, TrendingUp, Calculator, BookOpen, HelpCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GoldIcon from "@/components/GoldIcon";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const menuItems = [
   { name: "Home", path: "/", icon: TrendingUp },
-  { name: "Countries", path: "/countries", icon: BarChart3 },
+  { name: "Countries", path: "/countries", icon: Globe },
   { name: "Calculator", path: "/calculator", icon: Calculator },
   { name: "Gold Guide", path: "/guide", icon: BookOpen },
   { name: "FAQ", path: "/faq", icon: HelpCircle },

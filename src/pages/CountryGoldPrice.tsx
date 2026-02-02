@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, ArrowRightLeft, ArrowLeft, Globe } from "lucide-react";
+import { RefreshCw, Clock, MapPin, TrendingUp, Calculator, BarChart3, Layers, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import GoldIcon from "@/components/GoldIcon";
 import GoldPriceTable from "@/components/GoldPriceTable";
 import SpotGoldCard from "@/components/SpotGoldCard";
 import KaratComparison from "@/components/KaratComparison";
@@ -9,8 +8,8 @@ import GoldCalculator from "@/components/GoldCalculator";
 import SilverPriceCard from "@/components/SilverPriceCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
-import { CurrencyConverter } from "@/components/CurrencyConverter";
-import { useCountryGoldPrices, COUNTRIES } from "@/hooks/useCountryGoldPrices";
+import SectionHeader from "@/components/SectionHeader";
+import { useCountryGoldPrices } from "@/hooks/useCountryGoldPrices";
 
 const CountryGoldPrice = () => {
   const { countrySlug } = useParams<{ countrySlug: string }>();
@@ -43,11 +42,10 @@ const CountryGoldPrice = () => {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Back Button */}
         <div className="mb-6">
-          <Link to="/countries" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            <span>All Countries</span>
+            <span>Back to Home</span>
           </Link>
         </div>
 
@@ -96,18 +94,22 @@ const CountryGoldPrice = () => {
                 <SectionHeader icon={TrendingUp} title={`Spot Gold (24K) in ${country.currencySymbol}`} subtitle="Real-time international gold price" />
                 <SpotGoldCard spotGold={metrics.spotGold} isLoading={isLoading} currencySymbol={country.currencySymbol} />
               </section>
+              
               <section className="opacity-0 animate-slide-up delay-500">
                 <SectionHeader icon={BarChart3} title={`Gold Price Per Gram in ${country.currencySymbol}`} subtitle="All karat prices" />
                 <GoldPriceTable prices={metrics.gramPrices} isLoading={isLoading} currencySymbol={country.currencySymbol} />
               </section>
+              
               <section>
                 <SectionHeader icon={Layers} title="Karat Comparison" subtitle="Savings compared to 24K gold" />
                 <KaratComparison prices={metrics.gramPrices} />
               </section>
+              
               <section>
                 <SectionHeader icon={Calculator} title="Gold Calculator" subtitle="Calculate gold value by weight" />
                 <GoldCalculator prices={metrics.gramPrices} currencySymbol={country.currencySymbol} />
               </section>
+              
               {metrics.silverPrice && (
                 <section>
                   <SectionHeader icon={TrendingUp} title={`Silver Price in ${country.currencySymbol}`} subtitle="Real-time silver rates" color="silver" />
@@ -121,17 +123,5 @@ const CountryGoldPrice = () => {
     </div>
   );
 };
-
-const SectionHeader = ({ icon: Icon, title, subtitle, color = "gold" }: { icon: React.ElementType; title: string; subtitle: string; color?: "gold" | "silver" }) => (
-  <div className="flex items-center gap-3 mb-4 sm:mb-6">
-    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${color === "gold" ? "bg-primary/10 text-primary" : "bg-slate-400/10 text-slate-400"}`}>
-      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-    </div>
-    <div>
-      <h2 className="text-lg sm:text-xl font-semibold text-foreground">{title}</h2>
-      <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
-    </div>
-  </div>
-);
 
 export default CountryGoldPrice;
