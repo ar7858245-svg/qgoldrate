@@ -10,6 +10,10 @@ import { StickyBottomAd } from "@/components/AdBanner";
 import Index from "./pages/Index";
 import Countries from "./pages/Countries";
 import CountryGoldPrice from "./pages/CountryGoldPrice";
+import Calculator from "./pages/Calculator";
+import GoldGuide from "./pages/GoldGuide";
+import FAQ from "./pages/FAQ";
+import MarketNews from "./pages/MarketNews";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/countries" element={<Countries />} />
                 <Route path="/gold-price/:countrySlug" element={<CountryGoldPrice />} />
+                <Route path="/calculator" element={<Calculator />} />
+                <Route path="/guide" element={<GoldGuide />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/news" element={<MarketNews />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
