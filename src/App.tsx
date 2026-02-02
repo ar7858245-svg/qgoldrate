@@ -14,6 +14,12 @@ import Calculator from "./pages/Calculator";
 import GoldGuide from "./pages/GoldGuide";
 import FAQ from "./pages/FAQ";
 import MarketNews from "./pages/MarketNews";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Disclaimer from "./pages/Disclaimer";
+import DMCA from "./pages/DMCA";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +42,12 @@ const App = () => (
                 <Route path="/guide" element={<GoldGuide />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/news" element={<MarketNews />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/disclaimer" element={<Disclaimer />} />
+                <Route path="/dmca" element={<DMCA />} />
+                <Route path="/terms" element={<TermsOfService />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
