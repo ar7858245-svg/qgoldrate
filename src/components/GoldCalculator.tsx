@@ -1,12 +1,11 @@
-import { useState, useMemo, useRef } from "react";
-import { Calculator, Scale, ArrowRight, Download, Percent, DollarSign, Settings2, FileText } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Calculator, Scale, ArrowRight, Percent, DollarSign, Settings2, FileText, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GoldPrice } from "@/hooks/useGoldPrices";
 import { cn } from "@/lib/utils";
-import { useExchangeRates, ExchangeRates, formatCurrency } from "@/hooks/useExchangeRates";
 import jsPDF from "jspdf";
 
 interface GoldCalculatorProps {
@@ -23,19 +22,46 @@ const CONVERSION_TO_GRAMS: Record<WeightUnit, number> = {
   ounce: 31.1035,
 };
 
-const CURRENCY_SYMBOLS: Record<keyof ExchangeRates, { symbol: string; name: string }> = {
-  QAR: { symbol: "QAR", name: "Qatari Riyal" },
-  USD: { symbol: "$", name: "US Dollar" },
-  EUR: { symbol: "€", name: "Euro" },
-  GBP: { symbol: "£", name: "British Pound" },
-  BDT: { symbol: "৳", name: "Bangladeshi Taka" },
+type CurrencyCode = "QAR" | "USD" | "EUR" | "GBP" | "BDT" | "INR" | "PKR" | "SAR" | "AED" | "KWD";
+
+interface CurrencyInfo {
+  symbol: string;
+  name: string;
+  flag: string;
+  defaultRate: number;
+  allowCustomRate: boolean;
+}
+
+const CURRENCIES: Record<CurrencyCode, CurrencyInfo> = {
+  QAR: { symbol: "QAR", name: "Qatari Riyal", flag: "🇶🇦", defaultRate: 1, allowCustomRate: false },
+  USD: { symbol: "$", name: "US Dollar", flag: "🇺🇸", defaultRate: 0.2747, allowCustomRate: false },
+  EUR: { symbol: "€", name: "Euro", flag: "🇪🇺", defaultRate: 0.2530, allowCustomRate: false },
+  GBP: { symbol: "£", name: "British Pound", flag: "🇬🇧", defaultRate: 0.2180, allowCustomRate: false },
+  SAR: { symbol: "SAR", name: "Saudi Riyal", flag: "🇸🇦", defaultRate: 1.03, allowCustomRate: false },
+  AED: { symbol: "AED", name: "UAE Dirham", flag: "🇦🇪", defaultRate: 1.01, allowCustomRate: false },
+  KWD: { symbol: "KWD", name: "Kuwaiti Dinar", flag: "🇰🇼", defaultRate: 0.084, allowCustomRate: false },
+  BDT: { symbol: "৳", name: "Bangladeshi Taka", flag: "🇧🇩", defaultRate: 32.82, allowCustomRate: true },
+  INR: { symbol: "₹", name: "Indian Rupee", flag: "🇮🇳", defaultRate: 22.95, allowCustomRate: true },
+  PKR: { symbol: "Rs", name: "Pakistani Rupee", flag: "🇵🇰", defaultRate: 76.45, allowCustomRate: true },
 };
 
 const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps) => {
   const [weight, setWeight] = useState<string>("1");
   const [unit, setUnit] = useState<WeightUnit>("bori");
   const [selectedKarat, setSelectedKarat] = useState<string>("24K Gold");
-  const [selectedCurrency, setSelectedCurrency] = useState<keyof ExchangeRates>("QAR");
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>("QAR");
+  
+  // Custom rates for specific currencies
+  const [customRates, setCustomRates] = useState<Record<string, string>>({
+    BDT: "32.82",
+    INR: "22.95",
+    PKR: "76.45",
+  });
+  const [useCustomRates, setUseCustomRates] = useState<Record<string, boolean>>({
+    BDT: false,
+    INR: false,
+    PKR: false,
+  });
   
   // Custom price
   const [useCustomPrice, setUseCustomPrice] = useState(false);
@@ -50,7 +76,12 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
   const [includeTax, setIncludeTax] = useState(false);
   const [taxPercent, setTaxPercent] = useState<string>("5");
 
-  const { rates } = useExchangeRates();
+  const getConversionRate = (currency: CurrencyCode): number => {
+    if (CURRENCIES[currency].allowCustomRate && useCustomRates[currency]) {
+      return parseFloat(customRates[currency]) || CURRENCIES[currency].defaultRate;
+    }
+    return CURRENCIES[currency].defaultRate;
+  };
 
   const calculations = useMemo(() => {
     const weightNum = parseFloat(weight) || 0;
@@ -93,7 +124,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
     const totalQAR = subtotal + taxAmount;
 
     // Convert to selected currency
-    const conversionRate = rates?.[selectedCurrency] || 1;
+    const conversionRate = getConversionRate(selectedCurrency);
     const totalInCurrency = totalQAR * conversionRate;
     const pricePerGramInCurrency = pricePerGram * conversionRate;
     const makingChargeInCurrency = makingCharge * conversionRate;
@@ -112,7 +143,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       }),
       totalValueRaw: totalInCurrency,
     };
-  }, [weight, unit, selectedKarat, prices, useCustomPrice, customPrice, includeMakingCharge, makingChargeType, makingChargeValue, includeTax, taxPercent, selectedCurrency, rates]);
+  }, [weight, unit, selectedKarat, prices, useCustomPrice, customPrice, includeMakingCharge, makingChargeType, makingChargeValue, includeTax, taxPercent, selectedCurrency, customRates, useCustomRates]);
 
   const units: { value: WeightUnit; label: string }[] = [
     { value: "gram", label: "Gram" },
@@ -126,10 +157,17 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
     return u ? u.label : unitValue;
   };
 
+  const resetCustomRate = (currency: CurrencyCode) => {
+    setCustomRates(prev => ({
+      ...prev,
+      [currency]: CURRENCIES[currency].defaultRate.toString()
+    }));
+  };
+
   const generatePDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const currencyInfo = CURRENCY_SYMBOLS[selectedCurrency];
+    const currencyInfo = CURRENCIES[selectedCurrency];
     
     // Header
     doc.setFillColor(212, 175, 55);
@@ -170,6 +208,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       { label: "Weight", value: `${weight} ${getUnitLabel(unit)} (${calculations.weightInGrams}g)` },
       { label: "Price per Gram", value: `${currencyInfo.symbol} ${calculations.pricePerGram}` },
       { label: "Currency", value: `${currencyInfo.name} (${currencyInfo.symbol})` },
+      { label: "Exchange Rate", value: `1 QAR = ${getConversionRate(selectedCurrency)} ${currencyInfo.symbol}` },
     ];
     
     details.forEach(detail => {
@@ -248,6 +287,12 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
     doc.save(`gold-calculation-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
+  const currencyGroups = {
+    gulf: ["QAR", "SAR", "AED", "KWD"] as CurrencyCode[],
+    western: ["USD", "EUR", "GBP"] as CurrencyCode[],
+    southAsian: ["BDT", "INR", "PKR"] as CurrencyCode[],
+  };
+
   return (
     <div className="rounded-xl modern-card-gold overflow-hidden">
       <div className="p-4 sm:p-5 border-b border-border/30 bg-primary/5">
@@ -269,25 +314,128 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
         <div className="space-y-3">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <DollarSign className="w-4 h-4" />
-            Currency
+            Select Currency
           </Label>
-          <div className="grid grid-cols-5 gap-2">
-            {(Object.keys(CURRENCY_SYMBOLS) as (keyof ExchangeRates)[]).map((currency) => (
-              <button
-                key={currency}
-                type="button"
-                onClick={() => setSelectedCurrency(currency)}
-                className={cn(
-                  "px-3 py-2.5 text-sm font-medium rounded-lg border transition-all",
-                  selectedCurrency === currency
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted/50 hover:text-foreground"
-                )}
-              >
-                {CURRENCY_SYMBOLS[currency].symbol}
-              </button>
-            ))}
+          
+          {/* Gulf Countries */}
+          <div className="space-y-1.5">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Gulf Region</span>
+            <div className="grid grid-cols-4 gap-2">
+              {currencyGroups.gulf.map((currency) => (
+                <button
+                  key={currency}
+                  type="button"
+                  onClick={() => setSelectedCurrency(currency)}
+                  className={cn(
+                    "px-2 py-2.5 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5",
+                    selectedCurrency === currency
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted/50 hover:text-foreground"
+                  )}
+                >
+                  <span className="text-base">{CURRENCIES[currency].flag}</span>
+                  <span className="hidden sm:inline">{currency}</span>
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Western Currencies */}
+          <div className="space-y-1.5">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">International</span>
+            <div className="grid grid-cols-3 gap-2">
+              {currencyGroups.western.map((currency) => (
+                <button
+                  key={currency}
+                  type="button"
+                  onClick={() => setSelectedCurrency(currency)}
+                  className={cn(
+                    "px-2 py-2.5 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5",
+                    selectedCurrency === currency
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted/50 hover:text-foreground"
+                  )}
+                >
+                  <span className="text-base">{CURRENCIES[currency].flag}</span>
+                  <span>{CURRENCIES[currency].symbol}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* South Asian Currencies with Custom Rate Option */}
+          <div className="space-y-1.5">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">South Asia</span>
+            <div className="grid grid-cols-3 gap-2">
+              {currencyGroups.southAsian.map((currency) => (
+                <button
+                  key={currency}
+                  type="button"
+                  onClick={() => setSelectedCurrency(currency)}
+                  className={cn(
+                    "px-2 py-2.5 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5",
+                    selectedCurrency === currency
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted/50 hover:text-foreground"
+                  )}
+                >
+                  <span className="text-base">{CURRENCIES[currency].flag}</span>
+                  <span>{CURRENCIES[currency].symbol}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Rate Input for South Asian Currencies */}
+          {CURRENCIES[selectedCurrency].allowCustomRate && (
+            <div className="p-3 rounded-lg bg-accent/30 border border-accent/50 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={`customRate-${selectedCurrency}`}
+                    checked={useCustomRates[selectedCurrency]}
+                    onCheckedChange={(checked) => 
+                      setUseCustomRates(prev => ({ ...prev, [selectedCurrency]: checked as boolean }))
+                    }
+                  />
+                  <Label htmlFor={`customRate-${selectedCurrency}`} className="text-sm cursor-pointer">
+                    Use Custom Rate for {CURRENCIES[selectedCurrency].name}
+                  </Label>
+                </div>
+                <span className="text-lg">{CURRENCIES[selectedCurrency].flag}</span>
+              </div>
+              
+              {useCustomRates[selectedCurrency] && (
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">1 QAR =</span>
+                  <Input
+                    type="number"
+                    value={customRates[selectedCurrency]}
+                    onChange={(e) => setCustomRates(prev => ({ ...prev, [selectedCurrency]: e.target.value }))}
+                    className="h-9 bg-background border-border/50 focus:border-primary/50 rounded-lg flex-1"
+                    placeholder="Enter rate"
+                    min="0"
+                    step="0.01"
+                  />
+                  <span className="text-sm font-medium">{CURRENCIES[selectedCurrency].symbol}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => resetCustomRate(selectedCurrency)}
+                    title="Reset to default"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <p className="text-xs text-muted-foreground">
+                Current rate: 1 QAR = {getConversionRate(selectedCurrency)} {CURRENCIES[selectedCurrency].symbol}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Weight Input */}
@@ -378,7 +526,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
                 value={customPrice}
                 onChange={(e) => setCustomPrice(e.target.value)}
                 className="h-10 bg-background border-border/50 focus:border-primary/50 rounded-lg"
-                placeholder={`Enter price per gram in ${CURRENCY_SYMBOLS[selectedCurrency].symbol}`}
+                placeholder={`Enter price per gram in QAR`}
                 min="0"
                 step="0.01"
               />
@@ -430,7 +578,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
                   value={makingChargeValue}
                   onChange={(e) => setMakingChargeValue(e.target.value)}
                   className="flex-1 h-10 bg-background border-border/50 focus:border-primary/50 rounded-lg"
-                  placeholder={makingChargeType === "percent" ? "Enter %" : `Enter amount in ${CURRENCY_SYMBOLS[selectedCurrency].symbol}`}
+                  placeholder={makingChargeType === "percent" ? "Enter %" : `Enter amount in QAR`}
                   min="0"
                   step="0.1"
                 />
@@ -469,32 +617,37 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
 
         {/* Results */}
         <div className="p-5 rounded-xl bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">{CURRENCIES[selectedCurrency].flag}</span>
+            <span className="text-sm text-muted-foreground">{CURRENCIES[selectedCurrency].name}</span>
+          </div>
+          
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-3">
             <span>{weight} {getUnitLabel(unit)}</span>
             <ArrowRight className="w-4 h-4" />
             <span>{calculations.weightInGrams}g</span>
             <span className="text-primary">×</span>
-            <span className="text-primary">{CURRENCY_SYMBOLS[selectedCurrency].symbol} {calculations.pricePerGram}/g</span>
+            <span className="text-primary">{CURRENCIES[selectedCurrency].symbol} {calculations.pricePerGram}/g</span>
           </div>
 
           {/* Breakdown */}
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Base Gold Value:</span>
-              <span>{CURRENCY_SYMBOLS[selectedCurrency].symbol} {parseFloat(calculations.baseGoldValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+              <span>{CURRENCIES[selectedCurrency].symbol} {parseFloat(calculations.baseGoldValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
             </div>
             {includeMakingCharge && parseFloat(calculations.makingCharge) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
                   Making Charge ({makingChargeType === "percent" ? `${makingChargeValue}%` : "Fixed"}):
                 </span>
-                <span>{CURRENCY_SYMBOLS[selectedCurrency].symbol} {parseFloat(calculations.makingCharge).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+                <span>{CURRENCIES[selectedCurrency].symbol} {parseFloat(calculations.makingCharge).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
             {includeTax && parseFloat(calculations.taxAmount) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax ({taxPercent}%):</span>
-                <span>{CURRENCY_SYMBOLS[selectedCurrency].symbol} {parseFloat(calculations.taxAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+                <span>{CURRENCIES[selectedCurrency].symbol} {parseFloat(calculations.taxAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
           </div>
@@ -504,7 +657,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
               <span className="text-3xl sm:text-4xl font-bold gold-text">
                 {calculations.totalValue}
               </span>
-              <span className="text-lg text-primary font-semibold">{CURRENCY_SYMBOLS[selectedCurrency].symbol}</span>
+              <span className="text-lg text-primary font-semibold">{CURRENCIES[selectedCurrency].symbol}</span>
             </div>
 
             <p className="text-sm text-muted-foreground mt-3">
