@@ -135,6 +135,33 @@ export const COUNTRIES: Record<string, CountryConfig> = {
     url: "https://www.livepriceofgold.com/singapore-gold-price.html",
     pricePrefix: "SGD",
   },
+  bangladesh: {
+    code: "BDT",
+    name: "Bangladesh",
+    currency: "Bangladeshi Taka",
+    currencySymbol: "৳",
+    flag: "🇧🇩",
+    url: "https://www.livepriceofgold.com/bangladesh-gold-price.html",
+    pricePrefix: "BDT",
+  },
+  india: {
+    code: "INR",
+    name: "India",
+    currency: "Indian Rupee",
+    currencySymbol: "₹",
+    flag: "🇮🇳",
+    url: "https://www.livepriceofgold.com/india-gold-price.html",
+    pricePrefix: "INR",
+  },
+  pakistan: {
+    code: "PKR",
+    name: "Pakistan",
+    currency: "Pakistani Rupee",
+    currencySymbol: "₨",
+    flag: "🇵🇰",
+    url: "https://www.livepriceofgold.com/pakistan-gold-price.html",
+    pricePrefix: "PKR",
+  },
 };
 
 // Karat purity percentages
