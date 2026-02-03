@@ -1,1 +1,4 @@
 project_id = "ffuximduenyfmhczbzjp"
+
+[functions.gold-price-api]
+verify_jwt = false
