@@ -9,7 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  Home
+  Home,
+  Key
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,11 @@ import AdminAdsManager from "@/components/admin/AdminAdsManager";
 import AdminPagesManager from "@/components/admin/AdminPagesManager";
 import AdminSettingsManager from "@/components/admin/AdminSettingsManager";
 import AdminOverview from "@/components/admin/AdminOverview";
+import AdminApiManager from "@/components/admin/AdminApiManager";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "api", label: "API Manager", icon: Key },
   { id: "seo", label: "SEO Manager", icon: Search },
   { id: "ads", label: "Ad Manager", icon: Megaphone },
   { id: "pages", label: "Pages", icon: FileText },
@@ -51,6 +54,8 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "overview":
         return <AdminOverview />;
+      case "api":
+        return <AdminApiManager />;
       case "seo":
         return <AdminSeoManager />;
       case "ads":
