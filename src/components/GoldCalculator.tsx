@@ -72,6 +72,11 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
   const [makingChargeType, setMakingChargeType] = useState<"percent" | "fixed">("percent");
   const [makingChargeValue, setMakingChargeValue] = useState<string>("10");
   
+  // Hallmark Charge
+  const [includeHallmarkCharge, setIncludeHallmarkCharge] = useState(false);
+  const [hallmarkChargeType, setHallmarkChargeType] = useState<"percent" | "fixed">("fixed");
+  const [hallmarkChargeValue, setHallmarkChargeValue] = useState<string>("50");
+
   // Tax
   const [includeTax, setIncludeTax] = useState(false);
   const [taxPercent, setTaxPercent] = useState<string>("5");
@@ -110,8 +115,19 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       }
     }
 
+    // Calculate hallmark charge
+    let hallmarkCharge = 0;
+    if (includeHallmarkCharge) {
+      const chargeValue = parseFloat(hallmarkChargeValue) || 0;
+      if (hallmarkChargeType === "percent") {
+        hallmarkCharge = (baseGoldValue * chargeValue) / 100;
+      } else {
+        hallmarkCharge = chargeValue;
+      }
+    }
+
     // Subtotal before tax
-    const subtotal = baseGoldValue + makingCharge;
+    const subtotal = baseGoldValue + makingCharge + hallmarkCharge;
 
     // Calculate tax
     let taxAmount = 0;
@@ -128,6 +144,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
     const totalInCurrency = totalQAR * conversionRate;
     const pricePerGramInCurrency = pricePerGram * conversionRate;
     const makingChargeInCurrency = makingCharge * conversionRate;
+    const hallmarkChargeInCurrency = hallmarkCharge * conversionRate;
     const taxAmountInCurrency = taxAmount * conversionRate;
     const baseGoldValueInCurrency = baseGoldValue * conversionRate;
 
@@ -136,6 +153,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       pricePerGram: pricePerGramInCurrency.toFixed(2),
       baseGoldValue: baseGoldValueInCurrency.toFixed(2),
       makingCharge: makingChargeInCurrency.toFixed(2),
+      hallmarkCharge: hallmarkChargeInCurrency.toFixed(2),
       taxAmount: taxAmountInCurrency.toFixed(2),
       totalValue: totalInCurrency.toLocaleString("en-US", {
         minimumFractionDigits: 2,
@@ -143,7 +161,7 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       }),
       totalValueRaw: totalInCurrency,
     };
-  }, [weight, unit, selectedKarat, prices, useCustomPrice, customPrice, includeMakingCharge, makingChargeType, makingChargeValue, includeTax, taxPercent, selectedCurrency, customRates, useCustomRates]);
+  }, [weight, unit, selectedKarat, prices, useCustomPrice, customPrice, includeMakingCharge, makingChargeType, makingChargeValue, includeHallmarkCharge, hallmarkChargeType, hallmarkChargeValue, includeTax, taxPercent, selectedCurrency, customRates, useCustomRates]);
 
   const units: { value: WeightUnit; label: string }[] = [
     { value: "gram", label: "Gram" },
@@ -256,6 +274,16 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
       yPos += 10;
     }
     
+    // Hallmark charge
+    if (includeHallmarkCharge && parseFloat(calculations.hallmarkCharge) > 0) {
+      const chargeLabel = hallmarkChargeType === "percent" 
+        ? `Hallmark Charge (${hallmarkChargeValue}%)`
+        : `Hallmark Charge (Fixed)`;
+      doc.text(chargeLabel, 25, yPos);
+      doc.text(`${currencyInfo.symbol} ${parseFloat(calculations.hallmarkCharge).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, pageWidth - 50, yPos, { align: "right" });
+      yPos += 10;
+    }
+
     // Tax
     if (includeTax && parseFloat(calculations.taxAmount) > 0) {
       doc.text(`Tax (${taxPercent}%)`, 25, yPos);
@@ -586,6 +614,59 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
             )}
           </div>
 
+          {/* Hallmark Charge */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="hallmarkCharge"
+                checked={includeHallmarkCharge}
+                onCheckedChange={(checked) => setIncludeHallmarkCharge(checked as boolean)}
+              />
+              <Label htmlFor="hallmarkCharge" className="text-sm cursor-pointer">
+                Include Hallmark Charge
+              </Label>
+            </div>
+            {includeHallmarkCharge && (
+              <div className="flex gap-2">
+                <div className="flex rounded-lg overflow-hidden border border-border/50">
+                  <button
+                    type="button"
+                    onClick={() => setHallmarkChargeType("percent")}
+                    className={cn(
+                      "px-3 py-2 text-sm font-medium transition-all",
+                      hallmarkChargeType === "percent"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <Percent className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHallmarkChargeType("fixed")}
+                    className={cn(
+                      "px-3 py-2 text-sm font-medium transition-all",
+                      hallmarkChargeType === "fixed"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <DollarSign className="w-4 h-4" />
+                  </button>
+                </div>
+                <Input
+                  type="number"
+                  value={hallmarkChargeValue}
+                  onChange={(e) => setHallmarkChargeValue(e.target.value)}
+                  className="flex-1 h-10 bg-background border-border/50 focus:border-primary/50 rounded-lg"
+                  placeholder={hallmarkChargeType === "percent" ? "Enter %" : `Enter amount in QAR`}
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+            )}
+          </div>
+
           {/* Tax */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -642,6 +723,14 @@ const GoldCalculator = ({ prices, currencySymbol = "QAR" }: GoldCalculatorProps)
                   Making Charge ({makingChargeType === "percent" ? `${makingChargeValue}%` : "Fixed"}):
                 </span>
                 <span>{CURRENCIES[selectedCurrency].symbol} {parseFloat(calculations.makingCharge).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
+            {includeHallmarkCharge && parseFloat(calculations.hallmarkCharge) > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Hallmark Charge ({hallmarkChargeType === "percent" ? `${hallmarkChargeValue}%` : "Fixed"}):
+                </span>
+                <span>{CURRENCIES[selectedCurrency].symbol} {parseFloat(calculations.hallmarkCharge).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
             {includeTax && parseFloat(calculations.taxAmount) > 0 && (
