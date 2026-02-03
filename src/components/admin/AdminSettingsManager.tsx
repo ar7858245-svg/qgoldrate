@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useSiteSettings, useSaveSiteSetting, SiteSetting } from "@/hooks/useAdminData";
+import ImageUpload from "./ImageUpload";
 
 export default function AdminSettingsManager() {
   const { data: siteSettings, isLoading } = useSiteSettings();
@@ -98,59 +99,47 @@ export default function AdminSettingsManager() {
             </div>
           </div>
           
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Logo URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={localSettings.site_logo || ""}
-                  onChange={(e) => updateSetting("site_logo", e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                />
-                <Button 
-                  size="icon" 
-                  onClick={() => handleSave("site_logo")}
-                  disabled={saveMutation.isPending}
-                >
-                  <Save className="w-4 h-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Leave empty to use default gold icon</p>
+              <Label>সাইট লোগো</Label>
+              <ImageUpload
+                value={localSettings.site_logo || ""}
+                onChange={(url) => {
+                  updateSetting("site_logo", url);
+                  // Auto-save after upload
+                  if (url) {
+                    saveMutation.mutate({
+                      setting_key: "site_logo",
+                      setting_value: url,
+                    });
+                  }
+                }}
+                folder="logos"
+                placeholder="লোগো আপলোড"
+              />
+              <p className="text-xs text-muted-foreground">খালি রাখলে ডিফল্ট গোল্ড আইকন ব্যবহার হবে</p>
             </div>
             <div className="space-y-2">
-              <Label>Favicon URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={localSettings.site_favicon || ""}
-                  onChange={(e) => updateSetting("site_favicon", e.target.value)}
-                  placeholder="https://example.com/favicon.ico"
-                />
-                <Button 
-                  size="icon" 
-                  onClick={() => handleSave("site_favicon")}
-                  disabled={saveMutation.isPending}
-                >
-                  <Save className="w-4 h-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Leave empty to use default favicon</p>
+              <Label>ফেভিকন</Label>
+              <ImageUpload
+                value={localSettings.site_favicon || ""}
+                onChange={(url) => {
+                  updateSetting("site_favicon", url);
+                  // Auto-save after upload
+                  if (url) {
+                    saveMutation.mutate({
+                      setting_key: "site_favicon",
+                      setting_value: url,
+                    });
+                  }
+                }}
+                folder="favicons"
+                placeholder="ফেভিকন আপলোড"
+                accept="image/*,.ico"
+              />
+              <p className="text-xs text-muted-foreground">খালি রাখলে ডিফল্ট ফেভিকন ব্যবহার হবে</p>
             </div>
           </div>
-
-          {/* Logo Preview */}
-          {localSettings.site_logo && (
-            <div className="p-4 bg-muted rounded-lg">
-              <Label className="mb-2 block">Logo Preview</Label>
-              <img 
-                src={localSettings.site_logo} 
-                alt="Site Logo Preview" 
-                className="h-12 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
