@@ -23,6 +23,8 @@ import Disclaimer from "./pages/Disclaimer";
 import DMCA from "./pages/DMCA";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
@@ -31,6 +33,7 @@ const queryClient = new QueryClient();
 function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
 
   // Admin routes don't show main header/footer
   if (isAdminRoute) {
@@ -39,6 +42,16 @@ function AppContent() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/*" element={<AdminDashboard />} />
+      </Routes>
+    );
+  }
+
+  // Auth routes (login/register) don't show main header/footer
+  if (isAuthRoute) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     );
   }
