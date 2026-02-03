@@ -97,6 +97,134 @@ export default function AdminSettingsManager() {
               </div>
             </div>
           </div>
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Logo URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.site_logo || ""}
+                  onChange={(e) => updateSetting("site_logo", e.target.value)}
+                  placeholder="https://example.com/logo.png"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("site_logo")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Leave empty to use default gold icon</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Favicon URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.site_favicon || ""}
+                  onChange={(e) => updateSetting("site_favicon", e.target.value)}
+                  placeholder="https://example.com/favicon.ico"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("site_favicon")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Leave empty to use default favicon</p>
+            </div>
+          </div>
+
+          {/* Logo Preview */}
+          {localSettings.site_logo && (
+            <div className="p-4 bg-muted rounded-lg">
+              <Label className="mb-2 block">Logo Preview</Label>
+              <img 
+                src={localSettings.site_logo} 
+                alt="Site Logo Preview" 
+                className="h-12 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Contact Email</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.contact_email || ""}
+                  onChange={(e) => updateSetting("contact_email", e.target.value)}
+                  placeholder="contact@example.com"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("contact_email")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Social Media - Facebook</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.social_facebook || ""}
+                  onChange={(e) => updateSetting("social_facebook", e.target.value)}
+                  placeholder="https://facebook.com/yourpage"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("social_facebook")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Social Media - Twitter/X</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.social_twitter || ""}
+                  onChange={(e) => updateSetting("social_twitter", e.target.value)}
+                  placeholder="https://twitter.com/yourhandle"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("social_twitter")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Social Media - Instagram</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={localSettings.social_instagram || ""}
+                  onChange={(e) => updateSetting("social_instagram", e.target.value)}
+                  placeholder="https://instagram.com/yourhandle"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSave("social_instagram")}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
