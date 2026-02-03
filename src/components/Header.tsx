@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, TrendingUp, Calculator, BookOpen, HelpCircle, Globe, Newspaper } from "lucide-react";
+import { Menu, X, TrendingUp, Calculator, BookOpen, HelpCircle, Globe, Newspaper, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GoldIcon from "@/components/GoldIcon";
 import { cn } from "@/lib/utils";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 const menuItems = [
   { name: "Home", path: "/", icon: TrendingUp },
@@ -18,6 +19,7 @@ const menuItems = [
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAdmin } = useAdminAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -54,6 +56,16 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            
+            {/* Admin Button */}
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="outline" size="sm" className="hidden md:flex gap-2 border-primary/30 text-primary hover:bg-primary/10">
+                  <Settings className="w-4 h-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
@@ -87,6 +99,18 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
+              
+              {/* Mobile Admin Link */}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-3 text-sm font-medium rounded-lg transition-colors flex items-center gap-3 text-primary bg-primary/10"
+                >
+                  <Settings className="w-5 h-5" />
+                  Admin Panel
+                </Link>
+              )}
             </div>
           </nav>
         )}
