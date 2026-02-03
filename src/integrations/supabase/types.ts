@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_placements: {
+        Row: {
+          ad_code: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          pages: string[] | null
+          placement_type: string
+          priority: number | null
+          updated_at: string
+        }
+        Insert: {
+          ad_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          pages?: string[] | null
+          placement_type: string
+          priority?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ad_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          pages?: string[] | null
+          placement_type?: string
+          priority?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      custom_pages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          is_published: boolean | null
+          menu_order: number | null
+          meta_description: string | null
+          meta_title: string | null
+          show_in_menu: boolean | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          menu_order?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          show_in_menu?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          menu_order?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          show_in_menu?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gold_price_history: {
         Row: {
           created_at: string
@@ -38,12 +140,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          id: string
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
+          page_path: string
+          robots: string | null
+          structured_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_path: string
+          robots?: string | null
+          structured_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_path?: string
+          robots?: string | null
+          structured_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_type: string | null
+          setting_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: { user_email: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
