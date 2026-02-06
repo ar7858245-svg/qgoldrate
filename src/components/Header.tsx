@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, TrendingUp, Calculator, BookOpen, HelpCircle, Globe, Newspaper, Settings, LogIn, UserPlus, User, LogOut } from "lucide-react";
+import { Menu, X, TrendingUp, Calculator, BookOpen, HelpCircle, Globe, Newspaper, Settings, LogIn, UserPlus, User, LogOut, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GoldIcon from "@/components/GoldIcon";
