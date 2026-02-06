@@ -89,8 +89,8 @@ export default function AdminApiManager() {
 
   // Create API key from admin panel
   const handleCreateApiKey = async () => {
-    if (!newKeyUserId || !newKeyName) {
-      toast({ title: "Please fill all required fields", variant: "destructive" });
+    if (!newKeyName) {
+      toast({ title: "Please enter a key name", variant: "destructive" });
       return;
     }
 
@@ -100,20 +100,31 @@ export default function AdminApiManager() {
       const { data: apiKeyValue, error: keyError } = await supabase.rpc("generate_api_key");
       if (keyError) throw keyError;
 
-      // Get plan details for request limit
-      const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
-      const requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+      // Determine request limit
+      let requestsLimit: number;
+      if (useCustomLimit && newKeyCustomLimit) {
+        requestsLimit = parseInt(newKeyCustomLimit);
+      } else {
+        const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
+        requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+      }
 
-      // Insert API key
+      // Insert API key (user_id is now optional)
+      const insertData: any = {
+        api_key: apiKeyValue,
+        name: newKeyName,
+        plan_id: newKeyPlanId || null,
+        requests_limit: requestsLimit,
+      };
+      
+      // Only add user_id if selected
+      if (newKeyUserId) {
+        insertData.user_id = newKeyUserId;
+      }
+
       const { error: insertError } = await supabase
         .from("api_keys")
-        .insert({
-          user_id: newKeyUserId,
-          api_key: apiKeyValue,
-          name: newKeyName,
-          plan_id: newKeyPlanId || null,
-          requests_limit: requestsLimit,
-        });
+        .insert(insertData);
 
       if (insertError) throw insertError;
 
@@ -123,6 +134,8 @@ export default function AdminApiManager() {
       setNewKeyUserId("");
       setNewKeyName("");
       setNewKeyPlanId("");
+      setNewKeyCustomLimit("");
+      setUseCustomLimit(false);
     } catch (error: any) {
       toast({ title: "Error creating API key", description: error.message, variant: "destructive" });
     } finally {
