@@ -56,6 +56,8 @@ export default function AdminApiManager() {
   const [newKeyUserId, setNewKeyUserId] = useState("");
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyPlanId, setNewKeyPlanId] = useState("");
+  const [newKeyCustomLimit, setNewKeyCustomLimit] = useState("");
+  const [useCustomLimit, setUseCustomLimit] = useState(false);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
 
   const handleSavePlan = async () => {
