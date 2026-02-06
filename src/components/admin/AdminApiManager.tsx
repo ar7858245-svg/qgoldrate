@@ -56,6 +56,8 @@ export default function AdminApiManager() {
   const [newKeyUserId, setNewKeyUserId] = useState("");
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyPlanId, setNewKeyPlanId] = useState("");
+  const [newKeyCustomLimit, setNewKeyCustomLimit] = useState("");
+  const [useCustomLimit, setUseCustomLimit] = useState(false);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
 
   const handleSavePlan = async () => {
@@ -87,8 +89,8 @@ export default function AdminApiManager() {
 
   // Create API key from admin panel
   const handleCreateApiKey = async () => {
-    if (!newKeyUserId || !newKeyName) {
-      toast({ title: "Please fill all required fields", variant: "destructive" });
+    if (!newKeyName) {
+      toast({ title: "Please enter a key name", variant: "destructive" });
       return;
     }
 
@@ -98,20 +100,31 @@ export default function AdminApiManager() {
       const { data: apiKeyValue, error: keyError } = await supabase.rpc("generate_api_key");
       if (keyError) throw keyError;
 
-      // Get plan details for request limit
-      const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
-      const requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+      // Determine request limit
+      let requestsLimit: number;
+      if (useCustomLimit && newKeyCustomLimit) {
+        requestsLimit = parseInt(newKeyCustomLimit);
+      } else {
+        const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
+        requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+      }
 
-      // Insert API key
+      // Insert API key (user_id is now optional)
+      const insertData: any = {
+        api_key: apiKeyValue,
+        name: newKeyName,
+        plan_id: newKeyPlanId || null,
+        requests_limit: requestsLimit,
+      };
+      
+      // Only add user_id if selected
+      if (newKeyUserId) {
+        insertData.user_id = newKeyUserId;
+      }
+
       const { error: insertError } = await supabase
         .from("api_keys")
-        .insert({
-          user_id: newKeyUserId,
-          api_key: apiKeyValue,
-          name: newKeyName,
-          plan_id: newKeyPlanId || null,
-          requests_limit: requestsLimit,
-        });
+        .insert(insertData);
 
       if (insertError) throw insertError;
 
@@ -121,6 +134,8 @@ export default function AdminApiManager() {
       setNewKeyUserId("");
       setNewKeyName("");
       setNewKeyPlanId("");
+      setNewKeyCustomLimit("");
+      setUseCustomLimit(false);
     } catch (error: any) {
       toast({ title: "Error creating API key", description: error.message, variant: "destructive" });
     } finally {
@@ -350,12 +365,13 @@ export default function AdminApiManager() {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Select User *</Label>
+                    <Label>Select User (Optional)</Label>
                     <Select value={newKeyUserId} onValueChange={setNewKeyUserId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choose a user..." />
+                        <SelectValue placeholder="Choose a user (optional)..." />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">No user (Standalone Key)</SelectItem>
                         {allProfiles?.map((profile) => (
                           <SelectItem key={profile.user_id} value={profile.user_id}>
                             {profile.full_name || profile.email} ({profile.email})
@@ -363,13 +379,16 @@ export default function AdminApiManager() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty to create a standalone API key
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Key Name *</Label>
                     <Input
                       value={newKeyName}
                       onChange={(e) => setNewKeyName(e.target.value)}
-                      placeholder="e.g., Production Key, Development Key"
+                      placeholder="e.g., Production Key, Client XYZ"
                     />
                   </div>
                   <div className="space-y-2">
@@ -387,8 +406,28 @@ export default function AdminApiManager() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={useCustomLimit}
+                        onCheckedChange={setUseCustomLimit}
+                      />
+                      <Label>Set Custom Request Limit</Label>
+                    </div>
+                    {useCustomLimit && (
+                      <Input
+                        type="number"
+                        value={newKeyCustomLimit}
+                        onChange={(e) => setNewKeyCustomLimit(e.target.value)}
+                        placeholder="Enter custom request limit..."
+                      />
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      If no plan selected, Free Trial limits will apply
+                      {useCustomLimit 
+                        ? "Enter any number of requests you want to allow"
+                        : "Request limit will be based on selected plan (default: 50)"
+                      }
                     </p>
                   </div>
                 </div>
