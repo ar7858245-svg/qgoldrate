@@ -334,7 +334,75 @@ export default function AdminApiManager() {
         </TabsContent>
 
         <TabsContent value="keys" className="space-y-4">
-          <h3 className="text-lg font-semibold">All User API Keys</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">All User API Keys</h3>
+            <Dialog open={isCreateKeyDialogOpen} onOpenChange={setIsCreateKeyDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Generate API Key
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Generate New API Key</DialogTitle>
+                  <DialogDescription>Create an API key for any user with any plan</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select User *</Label>
+                    <Select value={newKeyUserId} onValueChange={setNewKeyUserId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a user..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allProfiles?.map((profile) => (
+                          <SelectItem key={profile.user_id} value={profile.user_id}>
+                            {profile.full_name || profile.email} ({profile.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Key Name *</Label>
+                    <Input
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      placeholder="e.g., Production Key, Development Key"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Select Plan</Label>
+                    <Select value={newKeyPlanId} onValueChange={setNewKeyPlanId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a plan (optional)..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans?.filter(p => p.is_active).map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name} - {plan.is_unlimited ? "Unlimited" : `${plan.monthly_requests} req/mo`} 
+                            {plan.price_usd > 0 && ` ($${plan.price_usd})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      If no plan selected, Free Trial limits will apply
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateKeyDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateApiKey} disabled={isCreatingKey}>
+                    {isCreatingKey ? "Creating..." : "Generate Key"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
 
           {keysLoading ? (
             <div className="text-center py-8">Loading...</div>
