@@ -85,6 +85,49 @@ export default function AdminApiManager() {
     });
   };
 
+  // Create API key from admin panel
+  const handleCreateApiKey = async () => {
+    if (!newKeyUserId || !newKeyName) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+
+    setIsCreatingKey(true);
+    try {
+      // Generate API key using RPC
+      const { data: apiKeyValue, error: keyError } = await supabase.rpc("generate_api_key");
+      if (keyError) throw keyError;
+
+      // Get plan details for request limit
+      const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
+      const requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+
+      // Insert API key
+      const { error: insertError } = await supabase
+        .from("api_keys")
+        .insert({
+          user_id: newKeyUserId,
+          api_key: apiKeyValue,
+          name: newKeyName,
+          plan_id: newKeyPlanId || null,
+          requests_limit: requestsLimit,
+        });
+
+      if (insertError) throw insertError;
+
+      toast({ title: "API Key created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["all-api-keys"] });
+      setIsCreateKeyDialogOpen(false);
+      setNewKeyUserId("");
+      setNewKeyName("");
+      setNewKeyPlanId("");
+    } catch (error: any) {
+      toast({ title: "Error creating API key", description: error.message, variant: "destructive" });
+    } finally {
+      setIsCreatingKey(false);
+    }
+  };
+
   const totalKeys = allApiKeys?.length || 0;
   const activeKeys = allApiKeys?.filter((k) => k.is_active).length || 0;
   const totalRequests = allApiKeys?.reduce((sum, k) => sum + (k.requests_used || 0), 0) || 0;
