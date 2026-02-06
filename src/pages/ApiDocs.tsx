@@ -50,6 +50,81 @@ curl_close($curl);
 
 print_r($data);
 ?>`,
+  htmlWidget: `<!-- Gold Price Widget -->
+<div id="gold-price-widget"></div>
+
+<script>
+  async function loadGoldPrices() {
+    const response = await fetch("${API_BASE_URL}", {
+      headers: { "x-api-key": "YOUR_API_KEY" }
+    });
+    const { data } = await response.json();
+    
+    document.getElementById("gold-price-widget").innerHTML = \`
+      <div style="font-family: Arial; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>Today's Gold Prices (QAR)</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td>24K</td><td>\${data.prices["24K"].per_gram} /gram</td></tr>
+          <tr><td>22K</td><td>\${data.prices["22K"].per_gram} /gram</td></tr>
+          <tr><td>21K</td><td>\${data.prices["21K"].per_gram} /gram</td></tr>
+          <tr><td>18K</td><td>\${data.prices["18K"].per_gram} /gram</td></tr>
+        </table>
+        <small>Updated: \${new Date(data.last_updated).toLocaleString()}</small>
+      </div>
+    \`;
+  }
+  loadGoldPrices();
+  setInterval(loadGoldPrices, 300000); // Refresh every 5 minutes
+</script>`,
+  reactComponent: `import { useState, useEffect } from 'react';
+
+function GoldPriceWidget() {
+  const [prices, setPrices] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPrices() {
+      try {
+        const response = await fetch("${API_BASE_URL}", {
+          headers: { "x-api-key": "YOUR_API_KEY" }
+        });
+        const { data } = await response.json();
+        setPrices(data);
+      } catch (error) {
+        console.error("Failed to fetch gold prices:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (!prices) return <div>Failed to load prices</div>;
+
+  return (
+    <div className="gold-price-widget">
+      <h3>Today's Gold Prices (QAR)</h3>
+      <table>
+        <tbody>
+          {Object.entries(prices.prices).map(([karat, price]) => (
+            <tr key={karat}>
+              <td>{karat}</td>
+              <td>{price.per_gram} QAR/gram</td>
+              <td>{price.per_tola} QAR/tola</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <small>Updated: {new Date(prices.last_updated).toLocaleString()}</small>
+    </div>
+  );
+}
+
+export default GoldPriceWidget;`,
 };
 
 const responseExample = `{
