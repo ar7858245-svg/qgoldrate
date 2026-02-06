@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Key, Users, Activity, DollarSign, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Edit, Trash2, Key, Users, Activity, DollarSign, ToggleLeft, ToggleRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import {
   useApiPlans,
   useSaveApiPlan,
@@ -18,16 +21,42 @@ import {
   useUpdateApiKey,
   type ApiPlan,
 } from "@/hooks/useApiKeys";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+// Hook to get all users/profiles
+function useAllProfiles() {
+  return useQuery({
+    queryKey: ["all-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+}
 
 export default function AdminApiManager() {
+  const queryClient = useQueryClient();
   const { data: plans, isLoading: plansLoading } = useApiPlans();
   const { data: allApiKeys, isLoading: keysLoading } = useAllApiKeys();
+  const { data: allProfiles } = useAllProfiles();
   const savePlan = useSaveApiPlan();
   const deletePlan = useDeleteApiPlan();
   const updateApiKey = useUpdateApiKey();
 
   const [editingPlan, setEditingPlan] = useState<Partial<ApiPlan> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // New state for creating API key
+  const [isCreateKeyDialogOpen, setIsCreateKeyDialogOpen] = useState(false);
+  const [newKeyUserId, setNewKeyUserId] = useState("");
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyPlanId, setNewKeyPlanId] = useState("");
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
 
   const handleSavePlan = async () => {
     if (!editingPlan?.name) return;
