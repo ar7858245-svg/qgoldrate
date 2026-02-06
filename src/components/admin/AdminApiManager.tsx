@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Key, Users, Activity, DollarSign, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Edit, Trash2, Key, Users, Activity, DollarSign, ToggleLeft, ToggleRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import {
   useApiPlans,
   useSaveApiPlan,
@@ -18,16 +21,42 @@ import {
   useUpdateApiKey,
   type ApiPlan,
 } from "@/hooks/useApiKeys";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+// Hook to get all users/profiles
+function useAllProfiles() {
+  return useQuery({
+    queryKey: ["all-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+}
 
 export default function AdminApiManager() {
+  const queryClient = useQueryClient();
   const { data: plans, isLoading: plansLoading } = useApiPlans();
   const { data: allApiKeys, isLoading: keysLoading } = useAllApiKeys();
+  const { data: allProfiles } = useAllProfiles();
   const savePlan = useSaveApiPlan();
   const deletePlan = useDeleteApiPlan();
   const updateApiKey = useUpdateApiKey();
 
   const [editingPlan, setEditingPlan] = useState<Partial<ApiPlan> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // New state for creating API key
+  const [isCreateKeyDialogOpen, setIsCreateKeyDialogOpen] = useState(false);
+  const [newKeyUserId, setNewKeyUserId] = useState("");
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyPlanId, setNewKeyPlanId] = useState("");
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
 
   const handleSavePlan = async () => {
     if (!editingPlan?.name) return;
@@ -54,6 +83,49 @@ export default function AdminApiManager() {
       id: keyId,
       updates: { requests_limit: newLimit },
     });
+  };
+
+  // Create API key from admin panel
+  const handleCreateApiKey = async () => {
+    if (!newKeyUserId || !newKeyName) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+
+    setIsCreatingKey(true);
+    try {
+      // Generate API key using RPC
+      const { data: apiKeyValue, error: keyError } = await supabase.rpc("generate_api_key");
+      if (keyError) throw keyError;
+
+      // Get plan details for request limit
+      const selectedPlan = plans?.find(p => p.id === newKeyPlanId);
+      const requestsLimit = selectedPlan?.is_unlimited ? 999999999 : (selectedPlan?.monthly_requests || 50);
+
+      // Insert API key
+      const { error: insertError } = await supabase
+        .from("api_keys")
+        .insert({
+          user_id: newKeyUserId,
+          api_key: apiKeyValue,
+          name: newKeyName,
+          plan_id: newKeyPlanId || null,
+          requests_limit: requestsLimit,
+        });
+
+      if (insertError) throw insertError;
+
+      toast({ title: "API Key created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["all-api-keys"] });
+      setIsCreateKeyDialogOpen(false);
+      setNewKeyUserId("");
+      setNewKeyName("");
+      setNewKeyPlanId("");
+    } catch (error: any) {
+      toast({ title: "Error creating API key", description: error.message, variant: "destructive" });
+    } finally {
+      setIsCreatingKey(false);
+    }
   };
 
   const totalKeys = allApiKeys?.length || 0;
@@ -262,7 +334,75 @@ export default function AdminApiManager() {
         </TabsContent>
 
         <TabsContent value="keys" className="space-y-4">
-          <h3 className="text-lg font-semibold">All User API Keys</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">All User API Keys</h3>
+            <Dialog open={isCreateKeyDialogOpen} onOpenChange={setIsCreateKeyDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Generate API Key
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Generate New API Key</DialogTitle>
+                  <DialogDescription>Create an API key for any user with any plan</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select User *</Label>
+                    <Select value={newKeyUserId} onValueChange={setNewKeyUserId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a user..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allProfiles?.map((profile) => (
+                          <SelectItem key={profile.user_id} value={profile.user_id}>
+                            {profile.full_name || profile.email} ({profile.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Key Name *</Label>
+                    <Input
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      placeholder="e.g., Production Key, Development Key"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Select Plan</Label>
+                    <Select value={newKeyPlanId} onValueChange={setNewKeyPlanId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a plan (optional)..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans?.filter(p => p.is_active).map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name} - {plan.is_unlimited ? "Unlimited" : `${plan.monthly_requests} req/mo`} 
+                            {plan.price_usd > 0 && ` ($${plan.price_usd})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      If no plan selected, Free Trial limits will apply
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateKeyDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateApiKey} disabled={isCreatingKey}>
+                    {isCreatingKey ? "Creating..." : "Generate Key"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
 
           {keysLoading ? (
             <div className="text-center py-8">Loading...</div>
