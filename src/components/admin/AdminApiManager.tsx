@@ -365,12 +365,13 @@ export default function AdminApiManager() {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Select User *</Label>
+                    <Label>Select User (Optional)</Label>
                     <Select value={newKeyUserId} onValueChange={setNewKeyUserId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choose a user..." />
+                        <SelectValue placeholder="Choose a user (optional)..." />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">No user (Standalone Key)</SelectItem>
                         {allProfiles?.map((profile) => (
                           <SelectItem key={profile.user_id} value={profile.user_id}>
                             {profile.full_name || profile.email} ({profile.email})
@@ -378,13 +379,16 @@ export default function AdminApiManager() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty to create a standalone API key
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Key Name *</Label>
                     <Input
                       value={newKeyName}
                       onChange={(e) => setNewKeyName(e.target.value)}
-                      placeholder="e.g., Production Key, Development Key"
+                      placeholder="e.g., Production Key, Client XYZ"
                     />
                   </div>
                   <div className="space-y-2">
@@ -402,8 +406,28 @@ export default function AdminApiManager() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={useCustomLimit}
+                        onCheckedChange={setUseCustomLimit}
+                      />
+                      <Label>Set Custom Request Limit</Label>
+                    </div>
+                    {useCustomLimit && (
+                      <Input
+                        type="number"
+                        value={newKeyCustomLimit}
+                        onChange={(e) => setNewKeyCustomLimit(e.target.value)}
+                        placeholder="Enter custom request limit..."
+                      />
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      If no plan selected, Free Trial limits will apply
+                      {useCustomLimit 
+                        ? "Enter any number of requests you want to allow"
+                        : "Request limit will be based on selected plan (default: 50)"
+                      }
                     </p>
                   </div>
                 </div>
