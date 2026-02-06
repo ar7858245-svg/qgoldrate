@@ -373,6 +373,112 @@ export default function ApiDocs() {
           </div>
         </section>
 
+        {/* Website Integration */}
+        <section className="py-16">
+          <div className="container">
+            <h2 className="text-3xl font-bold mb-4">Website Integration</h2>
+            <p className="text-muted-foreground mb-8">
+              আপনার ওয়েবসাইটে Gold Price API ইন্টিগ্রেট করার সহজ উপায়। নিচের উদাহরণগুলো দেখুন এবং আপনার প্রয়োজন অনুযায়ী কাস্টমাইজ করুন।
+            </p>
+            
+            <Card className="modern-card">
+              <CardContent className="pt-6">
+                <Tabs defaultValue="htmlWidget">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="htmlWidget">HTML Widget</TabsTrigger>
+                    <TabsTrigger value="reactComponent">React Component</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="htmlWidget">
+                    <div className="mb-4">
+                      <Badge className="bg-primary/10 text-primary mb-2">সবচেয়ে সহজ</Badge>
+                      <p className="text-sm text-muted-foreground">
+                        যেকোনো HTML ওয়েবসাইটে এই কোড পেস্ট করুন। এটি স্বয়ংক্রিয়ভাবে প্রতি ৫ মিনিটে আপডেট হবে।
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <pre className="bg-muted rounded-lg p-4 overflow-x-auto text-sm">
+                        <code>{codeExamples.htmlWidget}</code>
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2"
+                        onClick={() => copyToClipboard(codeExamples.htmlWidget, "htmlWidget")}
+                      >
+                        {copiedCode === "htmlWidget" ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="reactComponent">
+                    <div className="mb-4">
+                      <Badge className="bg-primary/10 text-primary mb-2">React/Next.js</Badge>
+                      <p className="text-sm text-muted-foreground">
+                        React বা Next.js প্রজেক্টে এই কম্পোনেন্ট ব্যবহার করুন। TypeScript এ টাইপ যোগ করতে পারেন।
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <pre className="bg-muted rounded-lg p-4 overflow-x-auto text-sm">
+                        <code>{codeExamples.reactComponent}</code>
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2"
+                        onClick={() => copyToClipboard(codeExamples.reactComponent, "reactComponent")}
+                      >
+                        {copiedCode === "reactComponent" ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Integration Tips */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <Card className="modern-card">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    Best Practices
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>✓ API Key ক্লায়েন্ট সাইডে এক্সপোজ করবেন না - সার্ভার সাইড প্রক্সি ব্যবহার করুন</p>
+                  <p>✓ Cache করুন - প্রতি রিকুয়েস্টে API কল করবেন না</p>
+                  <p>✓ Error handling যোগ করুন নেটওয়ার্ক সমস্যার জন্য</p>
+                  <p>✓ Loading state দেখান ভালো UX এর জন্য</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="modern-card">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Key className="w-5 h-5 text-primary" />
+                    Security Tips
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>✓ ব্যাকএন্ড সার্ভারে API কল করুন</p>
+                  <p>✓ Environment variables এ API Key রাখুন</p>
+                  <p>✓ Rate limiting সেটআপ করুন</p>
+                  <p>✓ CORS সঠিকভাবে কনফিগার করুন</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* Code Examples */}
         <section className="py-16 bg-muted/30">
           <div className="container">
