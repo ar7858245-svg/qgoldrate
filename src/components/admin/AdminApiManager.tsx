@@ -366,12 +366,12 @@ export default function AdminApiManager() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Select User (Optional)</Label>
-                    <Select value={newKeyUserId} onValueChange={setNewKeyUserId}>
+                    <Select value={newKeyUserId} onValueChange={(val) => setNewKeyUserId(val === "__standalone__" ? "" : val)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Choose a user (optional)..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No user (Standalone Key)</SelectItem>
+                        <SelectItem value="__standalone__">No user (Standalone Key)</SelectItem>
                         {allProfiles?.map((profile) => (
                           <SelectItem key={profile.user_id} value={profile.user_id}>
                             {profile.full_name || profile.email} ({profile.email})
