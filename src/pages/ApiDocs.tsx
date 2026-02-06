@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { toast } from "@/hooks/use-toast";
 
 const API_BASE_URL = "https://ffuximduenyfmhczbzjp.supabase.co/functions/v1/gold-price-api";
