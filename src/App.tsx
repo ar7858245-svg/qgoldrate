@@ -37,6 +37,7 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
   const isProfileRoute = location.pathname === "/profile";
+  const isApiDocsRoute = location.pathname === "/api-docs";
 
   // Admin routes don't show main header/footer
   if (isAdminRoute) {
