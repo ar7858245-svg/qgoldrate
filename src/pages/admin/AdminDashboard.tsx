@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Home,
-  Key
+  Key,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,9 +24,11 @@ import AdminPagesManager from "@/components/admin/AdminPagesManager";
 import AdminSettingsManager from "@/components/admin/AdminSettingsManager";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminApiManager from "@/components/admin/AdminApiManager";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "analytics", label: "API Analytics", icon: BarChart3 },
   { id: "api", label: "API Manager", icon: Key },
   { id: "seo", label: "SEO Manager", icon: Search },
   { id: "ads", label: "Ad Manager", icon: Megaphone },
@@ -54,6 +57,8 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "overview":
         return <AdminOverview />;
+      case "analytics":
+        return <AdminAnalytics />;
       case "api":
         return <AdminApiManager />;
       case "seo":
