@@ -138,16 +138,39 @@ export function useAllApiKeys() {
   return useQuery({
     queryKey: ["all-api-keys"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get all API keys
+      const { data: apiKeys, error: keysError } = await supabase
         .from("api_keys")
-        .select(`
-          *,
-          profiles:user_id (full_name, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (keysError) throw keysError;
+      
+      // Get unique user IDs that are not null
+      const userIds = [...new Set(apiKeys?.filter(k => k.user_id).map(k => k.user_id))] as string[];
+      
+      // Fetch profiles for those user IDs
+      let profilesMap: Record<string, { full_name: string | null; email: string }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email")
+          .in("user_id", userIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc, p) => {
+            acc[p.user_id] = { full_name: p.full_name, email: p.email };
+            return acc;
+          }, {} as Record<string, { full_name: string | null; email: string }>);
+        }
+      }
+      
+      // Merge API keys with profiles
+      return apiKeys?.map(key => ({
+        ...key,
+        profiles: key.user_id ? profilesMap[key.user_id] || null : null
+      })) || [];
     },
   });
 }
