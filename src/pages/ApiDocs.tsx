@@ -51,36 +51,54 @@ curl_close($curl);
 print_r($data);
 ?>`,
   htmlWidget: `<!-- Gold Price Widget -->
-<div id="gold-price-widget"></div>
+<div id="gold-price-widget">Loading gold prices...</div>
 
 <script>
   async function loadGoldPrices() {
-    const response = await fetch("${API_BASE_URL}", {
-      headers: { "x-api-key": "YOUR_API_KEY" }
-    });
-    const { data } = await response.json();
+    const widget = document.getElementById("gold-price-widget");
     
-    document.getElementById("gold-price-widget").innerHTML = \`
-      <div style="font-family: Arial; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h3>Today's Gold Prices (QAR)</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr><td>24K</td><td>\${data.prices["24K"].per_gram} /gram</td></tr>
-          <tr><td>22K</td><td>\${data.prices["22K"].per_gram} /gram</td></tr>
-          <tr><td>21K</td><td>\${data.prices["21K"].per_gram} /gram</td></tr>
-          <tr><td>18K</td><td>\${data.prices["18K"].per_gram} /gram</td></tr>
-        </table>
-        <small>Updated: \${new Date(data.last_updated).toLocaleString()}</small>
-      </div>
-    \`;
+    try {
+      const response = await fetch("${API_BASE_URL}", {
+        headers: { "x-api-key": "YOUR_API_KEY" }
+      });
+      
+      const data = await response.json();
+      
+      // Check if API returned success
+      if (!data.success) {
+        widget.innerHTML = '<div style="color: red;">Error: ' + (data.error || 'Failed to fetch') + '</div>';
+        return;
+      }
+      
+      // Build price table rows
+      let tableRows = '';
+      for (const [karat, price] of Object.entries(data.prices)) {
+        tableRows += '<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">' + karat + '</td><td style="padding: 8px; border-bottom: 1px solid #eee;">' + price + ' QAR/gram</td></tr>';
+      }
+      
+      widget.innerHTML = 
+        '<div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">' +
+          '<h3 style="margin-top: 0; color: #b8860b;">Today\\'s Gold Prices (' + data.currency + ')</h3>' +
+          '<table style="width: 100%; border-collapse: collapse;">' + tableRows + '</table>' +
+          '<small style="color: #666; display: block; margin-top: 10px;">Updated: ' + new Date(data.timestamp).toLocaleString() + '</small>' +
+        '</div>';
+        
+    } catch (error) {
+      widget.innerHTML = '<div style="color: red; padding: 20px;">সার্ভার থেকে তথ্য পাওয়া যাচ্ছে না। API key সঠিক কিনা দেখুন।</div>';
+      console.error("Gold Price API Error:", error);
+    }
   }
+  
+  // Load immediately and refresh every 5 minutes
   loadGoldPrices();
-  setInterval(loadGoldPrices, 300000); // Refresh every 5 minutes
+  setInterval(loadGoldPrices, 300000);
 </script>`,
   reactComponent: `import { useState, useEffect } from 'react';
 
 function GoldPriceWidget() {
-  const [prices, setPrices] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchPrices() {
@@ -88,10 +106,18 @@ function GoldPriceWidget() {
         const response = await fetch("${API_BASE_URL}", {
           headers: { "x-api-key": "YOUR_API_KEY" }
         });
-        const { data } = await response.json();
-        setPrices(data);
-      } catch (error) {
-        console.error("Failed to fetch gold prices:", error);
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch prices');
+        }
+        
+        setData(result);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Failed to fetch gold prices:", err);
       } finally {
         setLoading(false);
       }
@@ -102,24 +128,31 @@ function GoldPriceWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!prices) return <div>Failed to load prices</div>;
+  if (loading) return <div>Loading gold prices...</div>;
+  if (error) return <div style={{color: 'red'}}>Error: {error}</div>;
+  if (!data) return <div>No data available</div>;
 
   return (
     <div className="gold-price-widget">
-      <h3>Today's Gold Prices (QAR)</h3>
+      <h3>Today's Gold Prices ({data.currency})</h3>
       <table>
+        <thead>
+          <tr>
+            <th>Karat</th>
+            <th>Price per {data.unit}</th>
+          </tr>
+        </thead>
         <tbody>
-          {Object.entries(prices.prices).map(([karat, price]) => (
+          {Object.entries(data.prices).map(([karat, price]) => (
             <tr key={karat}>
               <td>{karat}</td>
-              <td>{price.per_gram} QAR/gram</td>
-              <td>{price.per_tola} QAR/tola</td>
+              <td>{price} QAR</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <small>Updated: {new Date(prices.last_updated).toLocaleString()}</small>
+      <small>Updated: {new Date(data.timestamp).toLocaleString()}</small>
+      <small>Usage: {data.usage.used} / {data.usage.limit} requests</small>
     </div>
   );
 }
@@ -129,34 +162,44 @@ export default GoldPriceWidget;`,
 
 const responseExample = `{
   "success": true,
-  "data": {
-    "spot_price_usd": 2650.50,
-    "spot_price_qar": 9653.82,
-    "currency": "QAR",
-    "prices": {
-      "24K": { "per_gram": 311.25, "per_tola": 3631.16 },
-      "22K": { "per_gram": 285.31, "per_tola": 3328.56 },
-      "21K": { "per_gram": 272.34, "per_tola": 3177.27 },
-      "18K": { "per_gram": 233.44, "per_tola": 2723.47 }
-    },
-    "last_updated": "2024-02-03T12:00:00Z"
+  "timestamp": "2026-02-06T19:14:26.549Z",
+  "currency": "QAR",
+  "unit": "gram",
+  "prices": {
+    "24K Gold": 580.99,
+    "22K Gold": 532.19,
+    "21K Gold": 508.37,
+    "18K Gold": 435.74,
+    "14K Gold": 338.91,
+    "10K Gold": 242.08,
+    "6K Gold": 145.25
+  },
+  "usage": {
+    "used": 3,
+    "limit": 1100,
+    "remaining": 1097
   }
 }`;
 
 const historyResponseExample = `{
   "success": true,
-  "data": [
+  "timestamp": "2026-02-06T19:14:26.549Z",
+  "currency": "QAR",
+  "unit": "gram",
+  "prices": { ... },
+  "history": [
     {
-      "karat": "24K",
-      "price_per_gram": 311.25,
-      "recorded_at": "2024-02-03T12:00:00Z"
+      "karat": "24K Gold",
+      "price_per_gram": 580.99,
+      "recorded_at": "2026-02-06T19:11:50.835Z"
     },
     {
-      "karat": "24K",
-      "price_per_gram": 310.50,
-      "recorded_at": "2024-02-02T12:00:00Z"
+      "karat": "24K Gold",
+      "price_per_gram": 579.50,
+      "recorded_at": "2026-02-05T19:11:50.835Z"
     }
-  ]
+  ],
+  "usage": { ... }
 }`;
 
 export default function ApiDocs() {
