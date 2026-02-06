@@ -162,34 +162,44 @@ export default GoldPriceWidget;`,
 
 const responseExample = `{
   "success": true,
-  "data": {
-    "spot_price_usd": 2650.50,
-    "spot_price_qar": 9653.82,
-    "currency": "QAR",
-    "prices": {
-      "24K": { "per_gram": 311.25, "per_tola": 3631.16 },
-      "22K": { "per_gram": 285.31, "per_tola": 3328.56 },
-      "21K": { "per_gram": 272.34, "per_tola": 3177.27 },
-      "18K": { "per_gram": 233.44, "per_tola": 2723.47 }
-    },
-    "last_updated": "2024-02-03T12:00:00Z"
+  "timestamp": "2026-02-06T19:14:26.549Z",
+  "currency": "QAR",
+  "unit": "gram",
+  "prices": {
+    "24K Gold": 580.99,
+    "22K Gold": 532.19,
+    "21K Gold": 508.37,
+    "18K Gold": 435.74,
+    "14K Gold": 338.91,
+    "10K Gold": 242.08,
+    "6K Gold": 145.25
+  },
+  "usage": {
+    "used": 3,
+    "limit": 1100,
+    "remaining": 1097
   }
 }`;
 
 const historyResponseExample = `{
   "success": true,
-  "data": [
+  "timestamp": "2026-02-06T19:14:26.549Z",
+  "currency": "QAR",
+  "unit": "gram",
+  "prices": { ... },
+  "history": [
     {
-      "karat": "24K",
-      "price_per_gram": 311.25,
-      "recorded_at": "2024-02-03T12:00:00Z"
+      "karat": "24K Gold",
+      "price_per_gram": 580.99,
+      "recorded_at": "2026-02-06T19:11:50.835Z"
     },
     {
-      "karat": "24K",
-      "price_per_gram": 310.50,
-      "recorded_at": "2024-02-02T12:00:00Z"
+      "karat": "24K Gold",
+      "price_per_gram": 579.50,
+      "recorded_at": "2026-02-05T19:11:50.835Z"
     }
-  ]
+  ],
+  "usage": { ... }
 }`;
 
 export default function ApiDocs() {
