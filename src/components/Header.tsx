@@ -204,24 +204,14 @@ export function Header() {
                     </button>
                   </>
                 ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="px-4 py-3 text-sm font-medium rounded-lg transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    >
-                      <LogIn className="w-5 h-5" />
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="px-4 py-3 text-sm font-medium rounded-lg transition-colors flex items-center gap-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      <UserPlus className="w-5 h-5" />
-                      Register
-                    </Link>
-                  </>
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium rounded-lg transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  >
+                    <LogIn className="w-5 h-5" />
+                    Admin Login
+                  </Link>
                 )}
               </div>
             </div>
