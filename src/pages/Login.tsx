@@ -133,13 +133,6 @@ export default function Login() {
               Sign In
             </Button>
 
-            <p className="text-sm text-muted-foreground text-center">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline font-medium">
-                Create one
-              </Link>
-            </p>
-
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground text-center">
               ← Back to Home
             </Link>
