@@ -51,10 +51,6 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "overview":
         return <AdminOverview />;
-      case "analytics":
-        return <AdminAnalytics />;
-      case "api":
-        return <AdminApiManager />;
       case "seo":
         return <AdminSeoManager />;
       case "ads":
