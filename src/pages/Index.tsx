@@ -13,6 +13,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { GoldPriceChart } from "@/components/GoldPriceChart";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { useGoldPrices } from "@/hooks/useGoldPrices";
+import { AdBanner, InArticleAd } from "@/components/AdBanner";
 
 const Index = () => {
   const { metrics, isLoading, error, lastUpdated, refetch } = useGoldPrices();
@@ -65,6 +66,11 @@ const Index = () => {
           </Button>
         </div>
 
+        {/* Top Ad Banner */}
+        <div className="flex justify-center mb-6">
+          <AdBanner size="responsive" className="max-w-[728px]" />
+        </div>
+
         <main className="space-y-6 sm:space-y-10">
           {isLoading && metrics.gramPrices.length === 0 ? (
             <div className="rounded-xl modern-card p-8"><LoadingSpinner /></div>
@@ -81,6 +87,9 @@ const Index = () => {
                 <SectionHeader icon={BarChart3} title="Gold Price Per Gram" subtitle="All karat prices in QAR" />
                 <GoldPriceTable prices={metrics.gramPrices} isLoading={isLoading} />
               </section>
+
+              {/* In-Article Ad after price table */}
+              <InArticleAd />
               
               <section><GoldPriceChart /></section>
               
@@ -88,6 +97,9 @@ const Index = () => {
               <section className="opacity-0 animate-slide-up">
                 <CountrySection />
               </section>
+
+              {/* In-Article Ad after country section */}
+              <InArticleAd />
               
               <section>
                 <SectionHeader icon={Layers} title="Karat Comparison" subtitle="Savings compared to 24K gold" />
@@ -110,6 +122,11 @@ const Index = () => {
                   <SilverPriceCard silverPrice={metrics.silverPrice} isLoading={isLoading} />
                 </section>
               )}
+
+              {/* Bottom Ad Banner */}
+              <div className="flex justify-center pt-4">
+                <AdBanner size="responsive" className="max-w-[728px]" />
+              </div>
             </>
           )}
         </main>
