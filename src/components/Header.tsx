@@ -128,18 +128,11 @@ export function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <>
-                    <Link to="/login">
-                      <Button variant="ghost" size="sm">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link to="/register">
-                      <Button size="sm">
-                        Register
-                      </Button>
-                    </Link>
-                  </>
+                  <Link to="/admin/login">
+                    <Button variant="ghost" size="sm">
+                      Admin Login
+                    </Button>
+                  </Link>
                 )}
               </div>
             )}
