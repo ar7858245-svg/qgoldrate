@@ -49,13 +49,12 @@ function AppContent() {
   }
 
   // Auth routes and special pages don't show main header/footer
-  if (isAuthRoute || isProfileRoute || isApiDocsRoute) {
+  if (isAuthRoute || isProfileRoute) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/api-docs" element={<ApiDocs />} />
       </Routes>
     );
   }

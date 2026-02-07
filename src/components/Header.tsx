@@ -23,7 +23,6 @@ const menuItems = [
   { name: "News", path: "/news", icon: Newspaper },
   { name: "Guide", path: "/guide", icon: BookOpen },
   { name: "FAQ", path: "/faq", icon: HelpCircle },
-  { name: "API", path: "/api-docs", icon: Code },
 ];
 
 export function Header() {
