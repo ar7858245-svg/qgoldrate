@@ -26,7 +26,6 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import ApiDocs from "./pages/ApiDocs";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
@@ -37,7 +36,6 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
   const isProfileRoute = location.pathname === "/profile";
-  const isApiDocsRoute = location.pathname === "/api-docs";
 
   // Admin routes don't show main header/footer
   if (isAdminRoute) {
@@ -51,13 +49,12 @@ function AppContent() {
   }
 
   // Auth routes and special pages don't show main header/footer
-  if (isAuthRoute || isProfileRoute || isApiDocsRoute) {
+  if (isAuthRoute || isProfileRoute) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/api-docs" element={<ApiDocs />} />
       </Routes>
     );
   }
