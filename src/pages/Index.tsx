@@ -13,6 +13,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { GoldPriceChart } from "@/components/GoldPriceChart";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { useGoldPrices } from "@/hooks/useGoldPrices";
+import { AdBanner, InArticleAd } from "@/components/AdBanner";
 
 const Index = () => {
   const { metrics, isLoading, error, lastUpdated, refetch } = useGoldPrices();
