@@ -9,9 +9,7 @@ import {
   LogOut,
   Menu,
   X,
-  Home,
-  Key,
-  BarChart3
+  Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,13 +21,9 @@ import AdminAdsManager from "@/components/admin/AdminAdsManager";
 import AdminPagesManager from "@/components/admin/AdminPagesManager";
 import AdminSettingsManager from "@/components/admin/AdminSettingsManager";
 import AdminOverview from "@/components/admin/AdminOverview";
-import AdminApiManager from "@/components/admin/AdminApiManager";
-import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "analytics", label: "API Analytics", icon: BarChart3 },
-  { id: "api", label: "API Manager", icon: Key },
   { id: "seo", label: "SEO Manager", icon: Search },
   { id: "ads", label: "Ad Manager", icon: Megaphone },
   { id: "pages", label: "Pages", icon: FileText },
